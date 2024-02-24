@@ -79,6 +79,7 @@ def MenuInterface(chosenLevel: int):
     PlaceText(SCREEN_SIZE / 2, SCREEN_SIZE / 4 * 3 + 65, f"Press ENTER to Start Level {chosenLevel}", (255, 234, 0), (0, 0, 0), 17, True)
 
 def SettingsMenuInterface(enemiesNum: int, enemiesSpeed: int):
+    """Інтерфейс меню налаштувань"""
     screen.fill((255, 234, 0))
     close = pygame.image.load("Resourses/close.png")
     oneGhost = pygame.image.load("Resourses/ghost.png")
@@ -107,6 +108,7 @@ def SettingsMenuInterface(enemiesNum: int, enemiesSpeed: int):
     DrawArrow(SCREEN_SIZE / 3 * 2, SCREEN_SIZE / 3 * 2, "right", 20, (0, 0, 0))
 
 def SettingsMenu(level: int, enemiesNum: int, enemiesSpeed: int, enemiesNumRange: tuple, enemiesSpeedRange: tuple)->tuple:
+    """Головна функція меню налаштувань"""
     SettingsMenuInterface(enemiesNum, enemiesSpeed)
     closeButton = pygame.Rect(10, 10, 30, 30)
     enemNumLeftButton = pygame.Rect(SCREEN_SIZE / 3, SCREEN_SIZE / 3 - 10, 20, 20)
@@ -146,12 +148,19 @@ def MouseOn(button: pygame.Rect)->bool:
     """Перевіряє чи знаходиться курсор миші над даною кнопкою класу pygame.Rect"""
     return button.collidepoint(pygame.mouse.get_pos())
 
-def SaveData(filename, level, enemiesNum, enemiesSpeed):
+def SaveData(filename: str, level: int, enemiesNum: int, enemiesSpeed: int):
+    """Записує останній вибір користувача (номер рівня, кількість та швидкість ворогів) у json файл
+    filename: ім'я сейв файлу (наприклад, PacmanSave.json)"""
     data = {"Level": level, "Number of Enemies": enemiesNum, "Enemies Speed": enemiesSpeed}
     with open(filename, 'w') as f:
         json.dump(data, f)
 
-def ReadData(filename, levelMax, enemiesNumRange, enemiesSpeedRange):
+def ReadData(filename: str, levelMax: int, enemiesNumRange: tuple, enemiesSpeedRange: tuple)->tuple:
+    """Зчитує номер рівня, к-сть, швидкість ворогів з вказаного сейв файлу\n
+    filename: ім'я сейв файлу (наприклад, PacmanSave.json)\n
+    levelMax - максимальне значення змінної level (використовується для перевірки даних у сейві)\n
+    enemiesNumRange - діапазон значень enemiesNum\n
+    enemiesSpeedRange - діапазон значень enemiesSpeed"""
     if path.exists(filename):
         with open(filename, 'r') as f:
             data = json.load(f)
