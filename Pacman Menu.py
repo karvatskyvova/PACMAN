@@ -5,17 +5,19 @@ pygame.init()
 SCREEN_SIZE: int = 500
 screen = pygame.display.set_mode((SCREEN_SIZE, SCREEN_SIZE)) #Розмір вікна
 pygame.display.set_caption("PACMAN")
-pygame.display.set_icon(pygame.image.load("Resourses\icon.png")) #Значок вікна
+pygame.display.set_icon(pygame.image.load("Resourses/icon.png")) #Значок вікна
 
-def DrawArrow(x, y, direction):
+def DrawArrow(x: int, y: int, direction: str, size: int, color: tuple):
     """Малює кнопки у вигляді стрілок для вибору рівня\n
     x, y: координати точки, в яку вказує стрілка
-    direction: напрямок (right/left)"""
+    direction: напрямок (right/left)
+    size: розмір у пікселях (стрілка вписана у квадрат)
+    color: колір стрілки"""
     if direction == "right":
-        points = [(x, y), (x - 50, y - 25), (x - 50, y + 25)]
+        points = [(x, y), (x - size, y - size / 2), (x - size, y + size / 2)]
     elif direction == "left":
-        points = [(x, y), (x + 50, y + 25), (x + 50, y - 25)]
-    pygame.draw.polygon(screen, (255, 234, 0), points)
+        points = [(x, y), (x + size, y + size / 2), (x + size, y - size / 2)]
+    pygame.draw.polygon(screen, color, points)
 
 def PlaceText(topLeftX: int, topLeftY: int, text: str, textColor: tuple, backgroundColor: tuple, fontSize: float, centered: bool):
     """Додає текст на екран, шрифт - freesansbold\n
@@ -24,7 +26,7 @@ def PlaceText(topLeftX: int, topLeftY: int, text: str, textColor: tuple, backgro
     textColor - колір тексту, формат: (х, х, х)\n
     backgroundColor - колір фону (не обов'язково), формат: (х, х, х)\n
     fontSize - розмір тексту\n
-    centered - відцентрований текст чи ні. Якщо так, topLeftX та topLeftY будуть вказувати в центр тексту, якщо ні, то у лівий верхній кут"""
+    centered - відцентрований текст чи ні. Якщо так, topLeftX та topLeftY будуть вказувати в центр тексту"""
     font = pygame.font.Font("freesansbold.ttf", fontSize)
     renderedText = font.render(text, True, textColor, backgroundColor)
     textRectangle = renderedText.get_rect()
@@ -35,13 +37,34 @@ def PlaceText(topLeftX: int, topLeftY: int, text: str, textColor: tuple, backgro
         textRectangle.top = topLeftY
     screen.blit(renderedText, textRectangle)
 
+#Винесена логіка з event для скорочення коду (використовується при виборі значення стрілочками)
+def Decrease(value: int, valueRange: tuple)->int:
+    """Використовується для зменшення лівою стрілкою значення на 1
+    value: поточне значення
+    valueRange: діапазон допустимих значень value
+    returns: оновлене значення"""
+    if value == valueRange[0]:
+        return valueRange[1]
+    else:
+        return value - 1
+        
+def Increase(value: int, valueRange: tuple)->int:
+    """Використовується для збільшення правою стрілкою значення на 1
+    value: поточне значення
+    valueRange: діапазон допустимих значень value
+    returns: оновлене значення"""
+    if value == valueRange[1]:
+        return valueRange[0]
+    else:
+        return value + 1
+    
 def MenuInterface(chosenLevel: int):
     """Малює інтерфейс меню (зображення та кнопки)"""
     #Логотип та фонове зображення
-    logo = pygame.image.load("Resourses\logo.png")
-    background1 = pygame.image.load("Resourses\level1.png")
-    background2 = pygame.image.load("Resourses\level2.png")
-    settings = pygame.image.load("Resourses\settings.png")
+    logo = pygame.image.load("Resourses/logo.png")
+    background1 = pygame.image.load("Resourses/level1.png")
+    background2 = pygame.image.load("Resourses/level2.png")
+    settings = pygame.image.load("Resourses/settings.png")
     settings = pygame.transform.smoothscale(settings, (30, 30))
     if chosenLevel == 1:
         screen.blit(background1, (0, 0))
@@ -50,26 +73,69 @@ def MenuInterface(chosenLevel: int):
     screen.blit(logo, (35, 30))
     screen.blit(settings, (10, 10))
     #Кнопки вибору рівня
-    DrawArrow(20, SCREEN_SIZE / 2, "left")
-    DrawArrow(SCREEN_SIZE - 20, SCREEN_SIZE / 2, "right")
+    DrawArrow(20, SCREEN_SIZE / 2, "left", 50, (255, 234, 0))
+    DrawArrow(SCREEN_SIZE - 20, SCREEN_SIZE / 2, "right", 50, (255, 234, 0))
     PlaceText(SCREEN_SIZE / 2, SCREEN_SIZE / 4 * 3 + 65, f"Press ENTER to Start Level {chosenLevel}", (255, 234, 0), (0, 0, 0), 17, True)
 
-def SettingsMenu(level: int, enemiesNum: int, enemiesSpeed: int)->tuple:
+def SettingsMenuInterface(enemiesNum: int, enemiesSpeed: int):
     screen.fill((255, 234, 0))
-    close = pygame.image.load("Resourses\close.png")
+    close = pygame.image.load("Resourses/close.png")
+    oneGhost = pygame.image.load("Resourses/ghost.png")
+    manyGhosts = pygame.image.load("Resourses/ghosts.png")
+    slowGhost = pygame.image.load("Resourses/ghost2.png")
+    fastGhost = pygame.image.load("Resourses/ghost speed.png")
+
     close = pygame.transform.smoothscale(close, (30, 30))
+    oneGhost = pygame.transform.smoothscale(oneGhost, (40, 40))
+    manyGhosts = pygame.transform.smoothscale(manyGhosts, (80, 40))
+    slowGhost = pygame.transform.smoothscale(slowGhost, (40, 40))
+    fastGhost = pygame.transform.smoothscale(fastGhost, (60, 40))
+    
     screen.blit(close, (10, 10))
+    screen.blit(oneGhost, (SCREEN_SIZE / 6 - 20, SCREEN_SIZE / 3 - 20))
+    screen.blit(manyGhosts, ((SCREEN_SIZE - SCREEN_SIZE / 6) - 40, SCREEN_SIZE / 3 - 20))
+    screen.blit(slowGhost, (SCREEN_SIZE / 6 - 20, SCREEN_SIZE / 3 * 2 - 20))
+    screen.blit(fastGhost, ((SCREEN_SIZE - SCREEN_SIZE / 6) - 30, SCREEN_SIZE / 3 * 2 - 20))
+
+    DrawArrow(SCREEN_SIZE / 3, SCREEN_SIZE / 3, "left", 20, (0, 0, 0))
+    PlaceText(SCREEN_SIZE / 2, SCREEN_SIZE / 3, str(enemiesNum), (0, 0, 0), None, 30, True)
+    DrawArrow(SCREEN_SIZE / 3 * 2, SCREEN_SIZE / 3, "right", 20, (0, 0, 0))
+
+    DrawArrow(SCREEN_SIZE / 3, SCREEN_SIZE / 3 * 2, "left", 20, (0, 0, 0))
+    PlaceText(SCREEN_SIZE / 2, SCREEN_SIZE / 3 * 2, str(enemiesSpeed), (0, 0, 0), None, 30, True)
+    DrawArrow(SCREEN_SIZE / 3 * 2, SCREEN_SIZE / 3 * 2, "right", 20, (0, 0, 0))
+
+def SettingsMenu(level: int, enemiesNum: int, enemiesSpeed: int, enemiesNumRange: tuple, enemiesSpeedRange: tuple)->tuple:
+    SettingsMenuInterface(enemiesNum, enemiesSpeed)
     closeButton = pygame.Rect(10, 10, 30, 30)
+    enemNumLeftButton = pygame.Rect(SCREEN_SIZE / 3, SCREEN_SIZE / 3 - 10, 20, 20)
+    enemNumRightButton = pygame.Rect(SCREEN_SIZE / 3 * 2 - 20, SCREEN_SIZE / 3 - 10, 20, 20)
+    enemSpeedLeftButton = pygame.Rect(SCREEN_SIZE / 3, SCREEN_SIZE / 3 * 2 - 10, 20, 20)
+    enemSpeedRightButton = pygame.Rect(SCREEN_SIZE / 3 * 2 - 20, SCREEN_SIZE / 3 * 2 - 10, 20, 20)
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if MouseOn(closeButton):
                     MenuInterface(level)
                     return enemiesNum, enemiesSpeed
+                elif MouseOn(enemNumLeftButton):
+                    enemiesNum = Decrease(enemiesNum, enemiesNumRange)
+                elif MouseOn(enemNumRightButton):
+                    enemiesNum = Increase(enemiesNum, enemiesNumRange)
+                elif MouseOn(enemSpeedLeftButton):
+                    enemiesSpeed = Decrease(enemiesSpeed, enemiesSpeedRange)
+                elif MouseOn(enemSpeedRightButton):
+                    enemiesSpeed = Increase(enemiesSpeed, enemiesSpeedRange)
+                SettingsMenuInterface(enemiesNum, enemiesSpeed)
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    MenuInterface(level)
+                    return enemiesNum, enemiesSpeed
             elif event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-        if MouseOn(closeButton):
+        if MouseOn(closeButton) or MouseOn(enemNumLeftButton) or MouseOn(enemNumRightButton) or MouseOn(enemSpeedLeftButton) or MouseOn(enemSpeedRightButton):
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
         else:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
@@ -83,11 +149,6 @@ def Menu()->tuple:
     """Стартове вікно гри. Вікривається одразу після запуску\n
     returns: номер обраного користувачем рівня, кількість та швидкість ворогів\n
     Якщо ці значення були передані через argv, одразу їх повертає"""
-    MenuInterface(1)
-    #Створення колізій для кнопок
-    leftArrow = pygame.Rect(20, SCREEN_SIZE / 2 - 25, 50, 50)
-    rightArrow = pygame.Rect(SCREEN_SIZE - 70, SCREEN_SIZE / 2 - 25, 50, 50)
-    settingsButton = pygame.Rect(10, 10, 30, 30)
     #Значення номеру рівня, к-сті та швидкості ворогів за замовчуванням (ПОТРЕБУЄ УТОЧНЕННЯ)
     level: int = 1
     enemiesNum: int = 5
@@ -104,40 +165,35 @@ def Menu()->tuple:
                 print("Wrong argv numbers")
         except Exception:
             print("Wrong argv type, expected int")
-
-    #Винесена логіка з event для скорочення коду (використовується при виборі рівнів)
-    def LevelToLeft(level, levelMax):
-        if level == 1:
-            return levelMax
-        else:
-            return level - 1
             
-    def LevelToRight(level, levelMax):
-        if level == levelMax:
-            return 1
-        else:
-            return level + 1
+    MenuInterface(level)
+    #Створення колізій для кнопок
+    leftArrow = pygame.Rect(20, SCREEN_SIZE / 2 - 25, 50, 50)
+    rightArrow = pygame.Rect(SCREEN_SIZE - 70, SCREEN_SIZE / 2 - 25, 50, 50)
+    settingsButton = pygame.Rect(10, 10, 30, 30)
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if MouseOn(leftArrow):
-                    level = LevelToLeft(level, levelMax)
+                    level = Decrease(level, (1, levelMax))
                     MenuInterface(level)
                 elif MouseOn(rightArrow):
-                    level = LevelToRight(level, levelMax)
+                    level = Increase(level, (1, levelMax))
                     MenuInterface(level)
                 elif MouseOn(settingsButton):
-                    enemiesNum, enemiesSpeed = SettingsMenu(level, enemiesNum, enemiesSpeed)
+                    enemiesNum, enemiesSpeed = SettingsMenu(level, enemiesNum, enemiesSpeed, enemiesNumRange, enemiesSpeedRange)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    level = LevelToLeft(level, levelMax)
+                    level = Decrease(level, (1, levelMax))
                     MenuInterface(level)
                 elif event.key == pygame.K_RIGHT:
-                    level = LevelToRight(level, levelMax)
+                    level = Increase(level, (1, levelMax))
                     MenuInterface(level)
                 elif event.key == pygame.K_RETURN:
                     return level, enemiesNum, enemiesSpeed
+                elif event.key == pygame.K_ESCAPE:
+                    enemiesNum, enemiesSpeed = SettingsMenu(level, enemiesNum, enemiesSpeed, enemiesNumRange, enemiesSpeedRange)
             elif event.type == pygame.QUIT:
                 return
         if MouseOn(leftArrow) or MouseOn(rightArrow) or MouseOn(settingsButton):
@@ -147,6 +203,7 @@ def Menu()->tuple:
         pygame.display.update()
 
 if __name__ == "__main__":
-    chosenLevel = Menu()
-    print(chosenLevel)
+    userChoice = Menu()
+    if userChoice != None:
+        print(f"\nUSER CHOICE\nLevel: {userChoice[0]}\nNumber of Enemies: {userChoice[1]}\nEnemies Speed: {userChoice[2]}\n")
     pygame.quit()
