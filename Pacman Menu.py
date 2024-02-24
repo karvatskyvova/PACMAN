@@ -1,5 +1,6 @@
-import pygame
+import pygame, json
 from sys import argv, exit
+from os import path
 
 pygame.init()
 SCREEN_SIZE: int = 500
@@ -129,7 +130,7 @@ def SettingsMenu(level: int, enemiesNum: int, enemiesSpeed: int, enemiesNumRange
                     enemiesSpeed = Increase(enemiesSpeed, enemiesSpeedRange)
                 SettingsMenuInterface(enemiesNum, enemiesSpeed)
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+                if event.key == pygame.K_ESCAPE or event.key == pygame.K_RETURN:
                     MenuInterface(level)
                     return enemiesNum, enemiesSpeed
             elif event.type == pygame.QUIT:
@@ -145,6 +146,32 @@ def MouseOn(button: pygame.Rect)->bool:
     """Перевіряє чи знаходиться курсор миші над даною кнопкою класу pygame.Rect"""
     return button.collidepoint(pygame.mouse.get_pos())
 
+def SaveData(filename, level, enemiesNum, enemiesSpeed):
+    data = {"Level": level, "Number of Enemies": enemiesNum, "Enemies Speed": enemiesSpeed}
+    with open(filename, 'w') as f:
+        json.dump(data, f)
+
+def ReadData(filename, levelMax, enemiesNumRange, enemiesSpeedRange):
+    if path.exists(filename):
+        with open(filename, 'r') as f:
+            data = json.load(f)
+            level = data["Level"]
+            enemiesNum = data["Number of Enemies"]
+            enemiesSpeed = data["Enemies Speed"]
+        try:
+            if level < 1 or level > levelMax:
+                raise Exception
+            elif enemiesNum < enemiesNumRange[0] or enemiesNum > enemiesNumRange[1]:
+                raise Exception
+            elif enemiesSpeed < enemiesSpeedRange[0] or enemiesSpeed > enemiesSpeedRange[1]:
+                raise Exception
+            else:
+                return level, enemiesNum, enemiesSpeed
+        except:
+            print("Error: Save File contains incorrect data")
+    else:
+        return None
+
 def Menu()->tuple:
     """Стартове вікно гри. Вікривається одразу після запуску\n
     returns: номер обраного користувачем рівня, кількість та швидкість ворогів\n
@@ -153,6 +180,7 @@ def Menu()->tuple:
     level: int = 1
     enemiesNum: int = 5
     enemiesSpeed: int = 5
+    saveFile: str = "PacmanSave.json"
     #Крайні значення номеру рівня, к-сті та швидкості ворогів (вик. для перевірок крайніх значень)
     levelMax: int = 2
     enemiesNumRange: tuple = (1, 10)
@@ -163,9 +191,15 @@ def Menu()->tuple:
                 return int(argv[1]), int(argv[2]), int(argv[3])
             else:
                 print("Wrong argv numbers")
-        except Exception:
+        except:
             print("Wrong argv type, expected int")
             
+    save = ReadData(saveFile, levelMax, enemiesNumRange, enemiesSpeedRange)
+    if save != None:
+        level = save[0]
+        enemiesNum = save[1]
+        enemiesSpeed = save[2]
+
     MenuInterface(level)
     #Створення колізій для кнопок
     leftArrow = pygame.Rect(20, SCREEN_SIZE / 2 - 25, 50, 50)
@@ -191,6 +225,7 @@ def Menu()->tuple:
                     level = Increase(level, (1, levelMax))
                     MenuInterface(level)
                 elif event.key == pygame.K_RETURN:
+                    SaveData(saveFile, level, enemiesNum, enemiesSpeed)
                     return level, enemiesNum, enemiesSpeed
                 elif event.key == pygame.K_ESCAPE:
                     enemiesNum, enemiesSpeed = SettingsMenu(level, enemiesNum, enemiesSpeed, enemiesNumRange, enemiesSpeedRange)
