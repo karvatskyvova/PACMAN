@@ -185,15 +185,15 @@ def Menu()->tuple:
     """Стартове вікно гри. Вікривається одразу після запуску\n
     returns: номер обраного користувачем рівня, кількість та швидкість ворогів\n
     Якщо ці значення були передані через argv, одразу їх повертає"""
-    #Значення номеру рівня, к-сті та швидкості ворогів за замовчуванням (ПОТРЕБУЄ УТОЧНЕННЯ)
+    #Значення номеру рівня, к-сті та швидкості ворогів за замовчуванням
     level: int = 1
-    enemiesNum: int = 5
-    enemiesSpeed: int = 5
+    enemiesNum: int = 2
+    enemiesSpeed: int = 2
     saveFile: str = "PacmanSave.json"
     #Крайні значення номеру рівня, к-сті та швидкості ворогів (вик. для перевірок крайніх значень)
     levelMax: int = 2
-    enemiesNumRange: tuple = (1, 10)
-    enemiesSpeedRange: tuple = (1, 10)
+    enemiesNumRange: tuple = (1, 4)
+    enemiesSpeedRange: tuple = (1, 4)
     if len(argv) == 4: #Передача номеру рівня, к-сті ворогів та їх швидкості через argv
         try:
             if int(argv[1]) >= 1 and int(argv [1]) <= levelMax and int(argv[2]) >= enemiesNumRange[0] and int(argv[2]) <= enemiesNumRange[1] and int(argv[3]) >= enemiesSpeedRange[0] and int(argv[3]) <= enemiesSpeedRange[1]:
