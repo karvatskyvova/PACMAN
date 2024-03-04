@@ -93,7 +93,7 @@ def startGame():
     pygame.display.set_caption('Pacman')
 
     clock = pygame.time.Clock()
-
+    
     pygame.font.init()
     font = pygame.font.Font("Anta-Regular.ttf", 24)
     font_pacman = pygame.font.Font("PAC-FONT.TTF", 48)
@@ -104,11 +104,10 @@ def startGame():
     wall_list, block_list = setupMaze(all_sprites_list)
     gate = setupGate(all_sprites_list)
 
-    player = Player("Characters/Pacman.png", player_width, player_height)
+    player = Player("Characters/PacmanRight.png", player_width, player_height)
     player.rect.x = player_initial_x
     player.rect.y = player_initial_y
 
-    # Spawn ghosts inside the gate
     pink_ghost = Ghost("Characters/Pink.png", ghost_width, ghost_height, Pink_directions)
     blue_ghost = Ghost("Characters/Blue.png", ghost_width, ghost_height, Blue_directions)
     red_ghost = Ghost("Characters/Red.png", ghost_width, ghost_height, Red_directions)
@@ -125,19 +124,23 @@ def startGame():
     yellow_points = len(block_list)
 
     score = 0
-
+    gate_rect = pygame.Rect(282, 242, 42, 2)
     while not done:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
+                    player.image = pygame.image.load("Characters/PacmanLeft.png").convert_alpha()
                     player.changespeed(-30, 0)
                 elif event.key == pygame.K_RIGHT:
+                    player.image = pygame.image.load("Characters/PacmanRight.png").convert_alpha()
                     player.changespeed(30, 0)
                 elif event.key == pygame.K_UP:
+                    player.image = pygame.image.load("Characters/PacmanUp.png").convert_alpha()
                     player.changespeed(0, -30)
                 elif event.key == pygame.K_DOWN:
+                    player.image = pygame.image.load("Characters/PacmanDown.png").convert_alpha()
                     player.changespeed(0, 30)
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT:
@@ -168,7 +171,7 @@ def startGame():
         player_group.update(wall_list)
         player_group.draw(screen)
 
-        ghost_group.update(wall_list)
+        ghost_group.update(wall_list, gate_rect)
         ghost_group.draw(screen)
         text_pacman = font_pacman.render("PACMAN", True, yellow)
         screen.blit(text_pacman, [175, 610])
