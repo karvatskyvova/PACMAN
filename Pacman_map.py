@@ -84,19 +84,15 @@ background.fill(black)
 clock = pygame.time.Clock()
 pygame.font.init()
 font = pygame.font.Font("Anta-Regular.ttf", 24)
-font_pacman = pygame.font.Font("PAC-FONT.TTF", 48)  
 
 def startGame():
     pygame.init()
 
-    screen = pygame.display.set_mode([606, 700])
-    pygame.display.set_caption('Pacman')
+    screen = pygame.display.set_mode([606, 606])
 
     clock = pygame.time.Clock()
     
     pygame.font.init()
-    font = pygame.font.Font("Anta-Regular.ttf", 24)
-    font_pacman = pygame.font.Font("PAC-FONT.TTF", 48)
 
     done = False
 
@@ -173,8 +169,6 @@ def startGame():
 
         ghost_group.update(wall_list, gate_rect)
         ghost_group.draw(screen)
-        text_pacman = font_pacman.render("PACMAN", True, yellow)
-        screen.blit(text_pacman, [175, 610])
 
         text_score = font.render("Score: " + str(score), True, white)
         screen.blit(text_score, [20, 20])
