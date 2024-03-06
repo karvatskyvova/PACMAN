@@ -3,7 +3,7 @@ from sys import argv, exit
 from os import path
 
 pygame.init()
-SCREEN_SIZE: int = 500
+SCREEN_SIZE: int = 606
 screen = pygame.display.set_mode((SCREEN_SIZE, SCREEN_SIZE)) #Розмір вікна
 pygame.display.set_caption("PACMAN")
 pygame.display.set_icon(pygame.image.load("Resourses/icon.png")) #Значок вікна
@@ -71,12 +71,12 @@ def MenuInterface(chosenLevel: int):
         screen.blit(background1, (0, 0))
     elif chosenLevel == 2:
         screen.blit(background2, (0, 0))
-    screen.blit(logo, (35, 30))
-    screen.blit(settings, (10, 10))
+    screen.blit(logo, (68, 40))
+    screen.blit(settings, (15, 15))
     #Кнопки вибору рівня
     DrawArrow(20, SCREEN_SIZE / 2, "left", 50, (255, 234, 0))
     DrawArrow(SCREEN_SIZE - 20, SCREEN_SIZE / 2, "right", 50, (255, 234, 0))
-    PlaceText(SCREEN_SIZE / 2, SCREEN_SIZE / 4 * 3 + 65, f"Press ENTER to Start Level {chosenLevel}", (255, 234, 0), (0, 0, 0), 17, True)
+    PlaceText(SCREEN_SIZE / 2, SCREEN_SIZE / 4 * 3 + 60, f"Press ENTER to Start Level {chosenLevel}", (255, 234, 0), (0, 0, 0), 18, True)
 
 def SettingsMenuInterface(enemiesNum: int, enemiesSpeed: int):
     """Інтерфейс меню налаштувань"""
@@ -93,7 +93,7 @@ def SettingsMenuInterface(enemiesNum: int, enemiesSpeed: int):
     slowGhost = pygame.transform.smoothscale(slowGhost, (40, 40))
     fastGhost = pygame.transform.smoothscale(fastGhost, (60, 40))
     
-    screen.blit(close, (10, 10))
+    screen.blit(close, (15, 15))
     screen.blit(oneGhost, (SCREEN_SIZE / 6 - 20, SCREEN_SIZE / 3 - 20))
     screen.blit(manyGhosts, ((SCREEN_SIZE - SCREEN_SIZE / 6) - 40, SCREEN_SIZE / 3 - 20))
     screen.blit(slowGhost, (SCREEN_SIZE / 6 - 20, SCREEN_SIZE / 3 * 2 - 20))
@@ -110,7 +110,7 @@ def SettingsMenuInterface(enemiesNum: int, enemiesSpeed: int):
 def SettingsMenu(level: int, enemiesNum: int, enemiesSpeed: int, enemiesNumRange: tuple, enemiesSpeedRange: tuple)->tuple:
     """Головна функція меню налаштувань"""
     SettingsMenuInterface(enemiesNum, enemiesSpeed)
-    closeButton = pygame.Rect(10, 10, 30, 30)
+    closeButton = pygame.Rect(15, 15, 30, 30)
     enemNumLeftButton = pygame.Rect(SCREEN_SIZE / 3, SCREEN_SIZE / 3 - 10, 20, 20)
     enemNumRightButton = pygame.Rect(SCREEN_SIZE / 3 * 2 - 20, SCREEN_SIZE / 3 - 10, 20, 20)
     enemSpeedLeftButton = pygame.Rect(SCREEN_SIZE / 3, SCREEN_SIZE / 3 * 2 - 10, 20, 20)
@@ -213,7 +213,7 @@ def Menu()->tuple:
     #Створення колізій для кнопок
     leftArrow = pygame.Rect(20, SCREEN_SIZE / 2 - 25, 50, 50)
     rightArrow = pygame.Rect(SCREEN_SIZE - 70, SCREEN_SIZE / 2 - 25, 50, 50)
-    settingsButton = pygame.Rect(10, 10, 30, 30)
+    settingsButton = pygame.Rect(15, 15, 30, 30)
 
     while True:
         for event in pygame.event.get():
