@@ -1,6 +1,7 @@
 import pygame
 from Characters import Player, Ghost, Pink_directions, Blue_directions, Red_directions, Yellow_directions
 from Pacman_menu import load_saved_settings, Menu
+
 player_width = 30
 player_height = 30
 ghost_width = 30
@@ -162,7 +163,7 @@ def startGame(enemiesNum):
             done = True
 
         if score == yellow_points:
-            done = True
+            break
 
         screen.fill(black)
         wall_list.draw(screen)
@@ -180,8 +181,6 @@ def startGame(enemiesNum):
         doWon("You Won!", 240, enemiesNum)
     else:
         doLost("You Lost!", 240, enemiesNum)
-
-    return Menu()
 
 def doWon(message, left, enemiesNum):
     while True:
