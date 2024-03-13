@@ -101,7 +101,6 @@ def startGame(enemiesNum):
     player.rect.y = player_initial_y
     player_group = pygame.sprite.RenderPlain(player)
    
-    # Create ghost objects with the specified number and speed
     ghosts = []
     for i in range(enemiesNum):
         if i % 4 == 0:
@@ -163,6 +162,7 @@ def startGame(enemiesNum):
             done = True
 
         if score == yellow_points:
+            done = True
             break
 
         screen.fill(black)
