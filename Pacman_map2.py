@@ -167,8 +167,9 @@ def startGame(enemiesNum):
                     player.changespeed(0, -15)
 
         yellow_collisions = pygame.sprite.spritecollide(player, block_list, True)
-        if yellow_collisions:
-            score += 1
+        for block in yellow_collisions:
+            block_list.remove(block)
+        score += len(yellow_collisions)
 
         if pygame.sprite.spritecollide(player, ghost_group, False):
             done = True
