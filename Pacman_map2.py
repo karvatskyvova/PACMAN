@@ -17,6 +17,7 @@ green = (0,255,0)
 red = (255,0,0)
 purple = (150,0,255)
 yellow   = ( 255, 255,0)
+orange=(255,165,0)
 
 class Wall(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, color):
@@ -51,7 +52,7 @@ def setupMaze(all_sprites_list):
                ]
      
     for item in walls:
-        wall = Wall(item[0], item[1], item[2], item[3], purple)
+        wall = Wall(item[0], item[1], item[2], item[3], orange)
         wall_list.add(wall)
         all_sprites_list.add(wall)
         
