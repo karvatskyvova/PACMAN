@@ -1,5 +1,15 @@
 import pygame
-  
+from Characters import Player, Ghost, Pink_directions, Blue_directions, Red_directions, Yellow_directions
+from Pacman_menu import load_saved_settings, Menu
+
+player_width = 30
+player_height = 30
+ghost_width = 30
+ghost_height = 30
+player_initial_x = 140
+player_initial_y = 100
+level, enemiesNum = load_saved_settings("PacmanSave.json")
+
 black = (0,0,0)
 white = (255,255,255)
 blue = (0,0,255)
@@ -7,7 +17,6 @@ green = (0,255,0)
 red = (255,0,0)
 purple = (150,0,255)
 yellow   = ( 255, 255,0)
-
 
 class Wall(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, color):
@@ -21,6 +30,7 @@ class Wall(pygame.sprite.Sprite):
 
 def setupMaze(all_sprites_list):
     wall_list = pygame.sprite.RenderPlain()
+    block_list = pygame.sprite.RenderPlain()
     walls = [ [60,60,66,36],[180,60,66,36],[300,0,6,66],
              [360,60,66,36],[480,60,66,36],[300,120,6,66],
              [240,150,126,6],[60,150,36,6],[150,150,6,36],
@@ -43,8 +53,21 @@ def setupMaze(all_sprites_list):
         wall = Wall(item[0], item[1], item[2], item[3], purple)
         wall_list.add(wall)
         all_sprites_list.add(wall)
+        
+    for row in range(19):
+        for column in range(19):
+            if (row == 7 or row == 8) and (column == 8 or column == 9 or column == 10):
+                continue
+            else:
+                block = Block(yellow, 4, 4)
+                block.rect.x = (30 * column + 6) + 26
+                block.rect.y = (30 * row + 6) + 26
+                b_collide = pygame.sprite.spritecollide(block, wall_list, False)
+                if not b_collide:
+                    block_list.add(block)
+                    all_sprites_list.add(block)
          
-    return wall_list
+    return wall_list, block_list
 
 
 def setupGate(all_sprites_list):
@@ -72,70 +95,113 @@ background.fill(black)
 clock = pygame.time.Clock()
 pygame.font.init()
 font = pygame.font.Font("Anta-Regular.ttf", 24)
-font_pacman = pygame.font.Font("PAC-FONT.TTF", 48)  
 
+def startGame(enemiesNum):
+    pygame.init()
+    screen = pygame.display.set_mode([606, 606])
+    clock = pygame.time.Clock()
+    pygame.font.init()
 
-def startGame():
-    all_sprites_list = pygame.sprite.RenderPlain()
-    block_list = pygame.sprite.RenderPlain()
-
-    wall_list = setupMaze(all_sprites_list)
-    gate = setupGate(all_sprites_list)
-
-    for row in range(19):
-        for column in range(19):
-            if (row == 7 or row == 8) and (column == 8 or column == 9 or column == 10):
-                continue
-            else:
-                block = Block(yellow, 4, 4)
-                block.rect.x = (30 * column + 6) + 26
-                block.rect.y = (30 * row + 6) + 26
-                b_collide = pygame.sprite.spritecollide(block, wall_list, False)
-                if not b_collide:
-                    block_list.add(block)
-                    all_sprites_list.add(block)
-  
-
-    bll = len(block_list)
-    score = 0
     done = False
+    all_sprites_list = pygame.sprite.RenderPlain()
+    wall_list, block_list = setupMaze(all_sprites_list)
+    gate = setupGate(all_sprites_list)
+    player = Player("Characters/PacmanRight.png", player_width, player_height)
+    player.rect.x = player_initial_x
+    player.rect.y = player_initial_y
+    player_group = pygame.sprite.RenderPlain(player)
+   
+    # Create ghost objects with the specified number and speed
+    ghosts = []
+    for i in range(enemiesNum):
+        if i % 4 == 0:
+            ghost = Ghost("Characters/Pink.png", ghost_width, ghost_height, Pink_directions)
+        elif i % 4 == 1:
+            ghost = Ghost("Characters/Blue.png", ghost_width, ghost_height, Blue_directions)
+        elif i % 4 == 2:
+            ghost = Ghost("Characters/Red.png", ghost_width, ghost_height, Red_directions)
+        else:
+            ghost = Ghost("Characters/Yellow.png", ghost_width, ghost_height, Yellow_directions)
+        ghost.num_of_ghosts = enemiesNum
+        ghosts.append(ghost)
 
+    # Set positions for ghosts
+    ghost_positions = [(282, 242), (282, 242), (282, 242), (282, 242)]  # Example positions, you can modify as needed
+    for i, ghost in enumerate(ghosts):
+        ghost.rect.x, ghost.rect.y = ghost_positions[i]
+
+    ghost_group = pygame.sprite.RenderPlain(ghosts)
+    yellow_points = len(block_list)
+    score = 0
+    gate_rect = pygame.Rect(282, 242, 42, 2)
     while not done:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                done = True
+                return Menu()  # Return to the menu when user quits
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return Menu()  # Return to the menu when Escape key is pressed
+                if event.key == pygame.K_LEFT:
+                    player.image = pygame.image.load("Characters/PacmanLeft.png").convert_alpha()
+                    player.changespeed(-15, 0)
+                elif event.key == pygame.K_RIGHT:
+                    player.image = pygame.image.load("Characters/PacmanRight.png").convert_alpha()
+                    player.changespeed(15, 0)
+                elif event.key == pygame.K_UP:
+                    player.image = pygame.image.load("Characters/PacmanUp.png").convert_alpha()
+                    player.changespeed(0, -15)
+                elif event.key == pygame.K_DOWN:
+                    player.image = pygame.image.load("Characters/PacmanDown.png").convert_alpha()
+                    player.changespeed(0, 15)
+                elif event.key == pygame.K_r:  # Restart when 'R' key is pressed
+                    return startGame(enemiesNum)
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT:
+                    player.changespeed(15, 0)
+                if event.key == pygame.K_RIGHT:
+                    player.changespeed(-15, 0)
+                if event.key == pygame.K_UP:
+                    player.changespeed(0, 15)
+                if event.key == pygame.K_DOWN:
+                    player.changespeed(0, -15)
+
+        yellow_collisions = pygame.sprite.spritecollide(player, block_list, True)
+        if yellow_collisions:
+            score += 1
+
+        if pygame.sprite.spritecollide(player, ghost_group, False):
+            done = True
+
+        if score == yellow_points:
+            break
 
         screen.fill(black)
         wall_list.draw(screen)
         gate.draw(screen)
-        all_sprites_list.draw(screen)
-
-        text = font.render("Score: " + str(score) + "/" + str(bll), True, white)
-        screen.blit(text, [10, 5])
-        text_pacman = font_pacman.render("PACMAN", True, yellow)
-        screen.blit(text_pacman, [175, 610])
-        '''
-        if score == bll:
-            doWon("Great, you won!", 145, all_sprites_list, block_list, monsta_list, pacman_collide,
-                   wall_list, gate)
-        monsta_hit_list = pygame.sprite.spritecollide(Pacman, monsta_list, False)
-
-        if monsta_hit_list:
-            doLost("Game Over",235,all_sprites_list,block_list,monsta_list,pacman_collide,wall_list,gate) #
-        '''
+        block_list.draw(screen)
+        player_group.update(wall_list)
+        player_group.draw(screen)
+        ghost_group.update(wall_list, gate_rect)
+        ghost_group.draw(screen)
+        text_score = font.render("Score: " + str(score), True, white)
+        screen.blit(text_score, [20, 20])
         pygame.display.flip()
         clock.tick(10)
-      
-def doWon(message, left):
+    if score == yellow_points:
+        doWon("You Won!", 240, enemiesNum)
+    else:
+        doLost("You Lost!", 240, enemiesNum)
+
+def doWon(message, left, enemiesNum):
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
+                return Menu()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
+                    return Menu()
                 if event.key == pygame.K_RETURN:
-                    startGame()
+                    return startGame(enemiesNum)
 
         w = pygame.Surface((400,200))
         w.set_alpha(10)
@@ -153,16 +219,16 @@ def doWon(message, left):
         pygame.display.flip()
         clock.tick(10)
 
-def doLost(message, left):
+def doLost(message, left, enemiesNum):
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
+                return Menu()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
+                    return Menu()
                 if event.key == pygame.K_RETURN:
-                    startGame()
+                    return startGame(enemiesNum)
 
         w = pygame.Surface((400,200))
         w.set_alpha(10)
@@ -179,11 +245,6 @@ def doLost(message, left):
 
         pygame.display.flip()
         clock.tick(10)
-        
-startGame()
-pygame.quit()
 
-
-
-startGame()
+startGame(enemiesNum)
 pygame.quit()
