@@ -224,6 +224,11 @@ def Menu() -> tuple:
                         # Start the Pacman_map.py script using subprocess
                         subprocess.Popen(["python", "Pacman_map.py", str(level), str(enemiesNum)])
                         return level, enemiesNum
+                    if level == 2:
+                        SaveData(saveFile, level, enemiesNum)
+                        # Start the Pacman_map.py script using subprocess
+                        subprocess.Popen(["python", "Pacman_map2.py", str(level), str(enemiesNum)])
+                        return level, enemiesNum
                 elif event.key == pygame.K_ESCAPE:
                     enemiesNum = SettingsMenu(level, enemiesNum, enemiesNumRange)
             elif event.type == pygame.QUIT:
