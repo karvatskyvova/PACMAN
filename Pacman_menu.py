@@ -1,20 +1,24 @@
 import subprocess
-import pygame, json
+import pygame
+import json
 from sys import argv, exit
-from os import path, system
+from os import path
 
+# Initialize Pygame
 pygame.init()
-SCREEN_SIZE: int = 606
-screen = pygame.display.set_mode((SCREEN_SIZE, SCREEN_SIZE)) #Розмір вікна
+
+# Screen settings
+SCREEN_SIZE = 606
+screen = pygame.display.set_mode((SCREEN_SIZE, SCREEN_SIZE))
 pygame.display.set_caption("PACMAN")
-pygame.display.set_icon(pygame.image.load("Resourses/icon.png")) #Значок вікна
+pygame.display.set_icon(pygame.image.load("Resourses/icon.png"))
 
 def DrawArrow(x: int, y: int, direction: str, size: int, color: tuple):
-    """Малює кнопки у вигляді стрілок для вибору рівня\n
-    x, y: координати точки, в яку вказує стрілка
-    direction: напрямок (right/left)
-    size: розмір у пікселях (стрілка вписана у квадрат)
-    color: колір стрілки"""
+    """Draws arrow buttons for level selection\n
+    x, y: coordinates of the arrow's point
+    direction: direction (right/left)
+    size: size in pixels (arrow inscribed in a square)
+    color: arrow color"""
     if direction == "right":
         points = [(x, y), (x - size, y - size / 2), (x - size, y + size / 2)]
     elif direction == "left":
@@ -22,13 +26,13 @@ def DrawArrow(x: int, y: int, direction: str, size: int, color: tuple):
     pygame.draw.polygon(screen, color, points)
 
 def PlaceText(topLeftX: int, topLeftY: int, text: str, textColor: tuple, backgroundColor: tuple, fontSize: float, centered: bool):
-    """Додає текст на екран, шрифт - freesansbold\n
-    topLeftX, topLeftY - координати верхньої лівої точки прямокутника з текстом\n
-    text - зміст тексту\n
-    textColor - колір тексту, формат: (х, х, х)\n
-    backgroundColor - колір фону (не обов'язково), формат: (х, х, х)\n
-    fontSize - розмір тексту\n
-    centered - відцентрований текст чи ні. Якщо так, topLeftX та topLeftY будуть вказувати в центр тексту"""
+    """Adds text to the screen, using freesansbold font\n
+    topLeftX, topLeftY - coordinates of the top-left point of the text rectangle\n
+    text - text content\n
+    textColor - text color, format: (x, x, x)\n
+    backgroundColor - background color (optional), format: (x, x, x)\n
+    fontSize - text size\n
+    centered - whether the text is centered or not. If True, topLeftX and topLeftY will indicate the center of the text"""
     font = pygame.font.Font("freesansbold.ttf", fontSize)
     renderedText = font.render(text, True, textColor, backgroundColor)
     textRectangle = renderedText.get_rect()
@@ -39,30 +43,29 @@ def PlaceText(topLeftX: int, topLeftY: int, text: str, textColor: tuple, backgro
         textRectangle.top = topLeftY
     screen.blit(renderedText, textRectangle)
 
-#Винесена логіка з event для скорочення коду (використовується при виборі значення стрілочками)
-def Decrease(value: int, valueRange: tuple)->int:
-    """Використовується для зменшення лівою стрілкою значення на 1
-    value: поточне значення
-    valueRange: діапазон допустимих значень value
-    returns: оновлене значення"""
+def Decrease(value: int, valueRange: tuple) -> int:
+    """Used to decrease the value by 1 with the left arrow
+    value: current value
+    valueRange: range of acceptable values for value
+    returns: updated value"""
     if value == valueRange[0]:
         return valueRange[1]
     else:
         return value - 1
-        
-def Increase(value: int, valueRange: tuple)->int:
-    """Використовується для збільшення правою стрілкою значення на 1
-    value: поточне значення
-    valueRange: діапазон допустимих значень value
-    returns: оновлене значення"""
+
+def Increase(value: int, valueRange: tuple) -> int:
+    """Used to increase the value by 1 with the right arrow
+    value: current value
+    valueRange: range of acceptable values for value
+    returns: updated value"""
     if value == valueRange[1]:
         return valueRange[0]
     else:
         return value + 1
-    
+
 def MenuInterface(chosenLevel: int):
-    """Малює інтерфейс меню (зображення та кнопки)"""
-    #Логотип та фонове зображення
+    """Draws the menu interface (images and buttons)"""
+    # Logo and background image
     logo = pygame.image.load("Resourses/logo.png")
     background1 = pygame.image.load("Resourses/level1.png")
     background2 = pygame.image.load("Resourses/level2.png")
@@ -74,13 +77,13 @@ def MenuInterface(chosenLevel: int):
         screen.blit(background2, (0, 0))
     screen.blit(logo, (68, 40))
     screen.blit(settings, (15, 15))
-    #Кнопки вибору рівня
+    # Level selection buttons
     DrawArrow(20, SCREEN_SIZE / 2, "left", 50, (255, 234, 0))
     DrawArrow(SCREEN_SIZE - 20, SCREEN_SIZE / 2, "right", 50, (255, 234, 0))
     PlaceText(SCREEN_SIZE / 2, SCREEN_SIZE / 4 * 3 + 60, f"Press ENTER to Start Level {chosenLevel}", (255, 234, 0), (0, 0, 0), 18, True)
 
 def SettingsMenuInterface(enemiesNum: int):
-    """Інтерфейс меню налаштувань"""
+    """Settings menu interface"""
     screen.fill((255, 234, 0))
     close = pygame.image.load("Resourses/close.png")
     oneGhost = pygame.image.load("Resourses/ghost.png")
@@ -89,7 +92,7 @@ def SettingsMenuInterface(enemiesNum: int):
     close = pygame.transform.smoothscale(close, (30, 30))
     oneGhost = pygame.transform.smoothscale(oneGhost, (40, 40))
     manyGhosts = pygame.transform.smoothscale(manyGhosts, (80, 40))
-    
+
     screen.blit(close, (15, 15))
     screen.blit(oneGhost, (SCREEN_SIZE / 6 - 20, SCREEN_SIZE / 3 - 20))
     screen.blit(manyGhosts, ((SCREEN_SIZE - SCREEN_SIZE / 6) - 40, SCREEN_SIZE / 3 - 20))
@@ -98,8 +101,8 @@ def SettingsMenuInterface(enemiesNum: int):
     PlaceText(SCREEN_SIZE / 2, SCREEN_SIZE / 3, str(enemiesNum), (0, 0, 0), None, 30, True)
     DrawArrow(SCREEN_SIZE / 3 * 2, SCREEN_SIZE / 3, "right", 20, (0, 0, 0))
 
-def SettingsMenu(level: int, enemiesNum: int, enemiesNumRange: tuple)->tuple:
-    """Головна функція меню налаштувань"""
+def SettingsMenu(level: int, enemiesNum: int, enemiesNumRange: tuple) -> tuple:
+    """Main settings menu function"""
     SettingsMenuInterface(enemiesNum)
     closeButton = pygame.Rect(15, 15, 30, 30)
     enemNumLeftButton = pygame.Rect(SCREEN_SIZE / 3, SCREEN_SIZE / 3 - 10, 20, 20)
@@ -136,22 +139,22 @@ def load_saved_settings(filename):
         enemiesNum = data.get("Number of Enemies", 4)
     return level, enemiesNum
 
-def MouseOn(button: pygame.Rect)->bool:
-    """Перевіряє чи знаходиться курсор миші над даною кнопкою класу pygame.Rect"""
+def MouseOn(button: pygame.Rect) -> bool:
+    """Checks if the mouse cursor is over a given pygame.Rect button"""
     return button.collidepoint(pygame.mouse.get_pos())
 
 def SaveData(filename: str, level: int, enemiesNum: int):
-    """Записує останній вибір користувача (номер рівня, кількість ворогів) у json файл
-    filename: ім'я сейв файлу (наприклад, PacmanSave.json)"""
+    """Writes the user's last choice (level number, number of enemies) to a json file
+    filename: name of the save file (e.g., PacmanSave.json)"""
     data = {"Level": level, "Number of Enemies": enemiesNum}
     with open(filename, 'w') as f:
         json.dump(data, f)
 
-def ReadData(filename: str, levelMax: int, enemiesNumRange: tuple)->tuple:
-    """Зчитує номер рівня, к-сть ворогів з вказаного сейв файлу\n
-    filename: ім'я сейв файлу (наприклад, PacmanSave.json)\n
-    levelMax - максимальне значення змінної level (використовується для перевірки даних у сейві)\n
-    enemiesNumRange - діапазон значень enemiesNum"""
+def ReadData(filename: str, levelMax: int, enemiesNumRange: tuple) -> tuple:
+    """Reads the level number, number of enemies from the specified save file\n
+    filename: name of the save file (e.g., PacmanSave.json)\n
+    levelMax - maximum value of the level variable (used for checking data in the save)\n
+    enemiesNumRange - range of values for enemiesNum"""
     if path.exists(filename):
         with open(filename, 'r') as f:
             data = json.load(f)
@@ -170,18 +173,18 @@ def ReadData(filename: str, levelMax: int, enemiesNumRange: tuple)->tuple:
         return None
 
 def Menu() -> tuple:
-    """Стартове вікно гри. Вікривається одразу після запуску\n
-    returns: номер обраного користувачем рівня, кількість ворогів\n
-    Якщо ці значення були передані через argv, одразу їх повертає"""
-    # Значення номеру рівня, к-сті ворогів за замовчуванням
-    level: int = 1
-    enemiesNum: int = 2
-    saveFile: str = "PacmanSave.json"
-    # Крайні значення номеру рівня, к-сті ворогів (вик. для перевірок крайніх значень)
-    levelMax: int = 2
-    enemiesNumRange: tuple = (1, 4)
+    """Initial game window. Opens immediately after launch\n
+    returns: selected level number, number of enemies\n
+    If these values were passed through argv, they are immediately returned"""
+    # Default values for level number and number of enemies
+    level = 1
+    enemiesNum = 2
+    saveFile = "PacmanSave.json"
+    # Extreme values for level number and number of enemies (used for boundary checks)
+    levelMax = 2
+    enemiesNumRange = (1, 4)
     
-    if len(argv) == 4:  # Передача номеру рівня та к-сті ворогів через argv
+    if len(argv) == 4:  # Passing level number and number of enemies through argv
         try:
             if 1 <= int(argv[1]) <= levelMax and enemiesNumRange[0] <= int(argv[2]) <= enemiesNumRange[1]:
                 return int(argv[1]), int(argv[2])
@@ -195,7 +198,7 @@ def Menu() -> tuple:
         level, enemiesNum = save
     
     MenuInterface(level)
-    # Створення колізій для кнопок
+    # Creating collisions for buttons
     leftArrow = pygame.Rect(20, SCREEN_SIZE / 2 - 25, 50, 50)
     rightArrow = pygame.Rect(SCREEN_SIZE - 70, SCREEN_SIZE / 2 - 25, 50, 50)
     settingsButton = pygame.Rect(15, 15, 30, 30)
@@ -241,6 +244,6 @@ def Menu() -> tuple:
 
 if __name__ == "__main__":
     userChoice = Menu()
-    if userChoice != None:
+    if userChoice is not None:
         print(f"\nUSER CHOICE\nLevel: {userChoice[0]}\nNumber of Enemies: {userChoice[1]}\n")
     pygame.quit()

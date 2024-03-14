@@ -2,22 +2,27 @@ import pygame
 from Characters import Player, Ghost, Pink_directions, Blue_directions, Red_directions, Yellow_directions
 from Pacman_menu import load_saved_settings, Menu
 
+# Define constants for player and ghost dimensions and initial positions
 player_width = 30
 player_height = 30
 ghost_width = 30
 ghost_height = 30
 player_initial_x = 140
 player_initial_y = 100
+
+# Load saved settings for level and number of enemies
 level, enemiesNum = load_saved_settings("PacmanSave.json")
 
+# Define color constants
 black = (0,0,0)
 white = (255,255,255)
 blue = (0,0,255)
 green = (0,255,0)
 red = (255,0,0)
 purple = (150,0,255)
-yellow   = ( 255, 255,0)
+yellow = (255,255,0)
 
+# Define Wall class
 class Wall(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, color):
         pygame.sprite.Sprite.__init__(self)
@@ -27,10 +32,9 @@ class Wall(pygame.sprite.Sprite):
         self.rect.top = y
         self.rect.left = x
 
-
+# Define setupMaze function to create maze walls and blocks
 def setupMaze(all_sprites_list):
-    wall_list = pygame.sprite.RenderPlain()
-    block_list = pygame.sprite.RenderPlain()
+    # Define coordinates and dimensions for walls in the maze
     walls = [ [0,0,6,600], [0,0,600,6], [0,600,600,6], [600,0,6,600], [300,0,6,66], [60,60,186,6], [360,60,186,6],
               [60,120,66,6], [60,120,6,126], [180,120,246,6], [300,120,6,66], [480,120,66,6], [540,120,6,126],
               [120,180,126,6], [120,180,6,126], [360,180,126,6], [480,180,6,126], [180,240,6,126], [180,360,246,6],
@@ -38,12 +42,16 @@ def setupMaze(all_sprites_list):
               [0,300,66,6], [540,300,66,6], [60,360,66,6], [60,360,6,186], [480,360,66,6], [540,360,6,186],
               [120,420,366,6], [120,420,6,66], [480,420,6,66], [180,480,246,6], [300,480,6,66], [120,540,126,6],
               [360,540,126,6] ]
-     
+
+    # Create walls and blocks based on the defined coordinates
+    wall_list = pygame.sprite.RenderPlain()
+    block_list = pygame.sprite.RenderPlain()
     for item in walls:
         wall = Wall(item[0], item[1], item[2], item[3], purple)
         wall_list.add(wall)
         all_sprites_list.add(wall)
-        
+
+    # Create blocks for empty spaces in the maze
     for row in range(19):
         for column in range(19):
             if (row == 7 or row == 8) and (column == 8 or column == 9 or column == 10):
@@ -59,14 +67,14 @@ def setupMaze(all_sprites_list):
          
     return wall_list, block_list
 
-
+# Define setupGate function to create the gate in the maze
 def setupGate(all_sprites_list):
     gate = pygame.sprite.RenderPlain()
     gate.add(Wall(282, 242, 42, 2, white))
     all_sprites_list.add(gate)
     return gate
 
-
+# Define Block class for representing yellow blocks in the maze
 class Block(pygame.sprite.Sprite):
     def __init__(self, color, width, height):
         pygame.sprite.Sprite.__init__(self) 
@@ -76,7 +84,7 @@ class Block(pygame.sprite.Sprite):
         pygame.draw.ellipse(self.image, color, [0, 0, width, height])
         self.rect = self.image.get_rect() 
 
-
+# Initialize Pygame and create game window
 pygame.init()
 screen = pygame.display.set_mode([606, 700])
 pygame.display.set_caption('Pacman')
@@ -86,12 +94,15 @@ clock = pygame.time.Clock()
 pygame.font.init()
 font = pygame.font.Font("Anta-Regular.ttf", 24)
 
+# Define function to start the game
 def startGame(enemiesNum):
+    # Initialize Pygame and create game window
     pygame.init()
     screen = pygame.display.set_mode([606, 606])
     clock = pygame.time.Clock()
     pygame.font.init()
 
+    # Initialize game variables
     done = False
     all_sprites_list = pygame.sprite.RenderPlain()
     wall_list, block_list = setupMaze(all_sprites_list)
@@ -101,6 +112,7 @@ def startGame(enemiesNum):
     player.rect.y = player_initial_y
     player_group = pygame.sprite.RenderPlain(player)
    
+    # Create ghost objects based on the number of enemies
     ghosts = []
     for i in range(enemiesNum):
         if i % 4 == 0:
@@ -115,7 +127,7 @@ def startGame(enemiesNum):
         ghosts.append(ghost)
 
     # Set positions for ghosts
-    ghost_positions = [(282, 242), (282, 242), (282, 242), (282, 242)]  # Example positions, you can modify as needed
+    ghost_positions = [(282, 242), (282, 242), (282, 242), (282, 242)]
     for i, ghost in enumerate(ghosts):
         ghost.rect.x, ghost.rect.y = ghost_positions[i]
 
@@ -123,6 +135,8 @@ def startGame(enemiesNum):
     yellow_points = len(block_list)
     score = 0
     gate_rect = pygame.Rect(282, 242, 42, 2)
+
+    # Main game loop
     while not done:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -154,18 +168,22 @@ def startGame(enemiesNum):
                 if event.key == pygame.K_DOWN:
                     player.changespeed(0, -15)
 
+        # Check collisions with yellow blocks and update score
         yellow_collisions = pygame.sprite.spritecollide(player, block_list, True)
         for block in yellow_collisions:
             block_list.remove(block)
         score += len(yellow_collisions)
 
+        # Check collision with ghosts
         if pygame.sprite.spritecollide(player, ghost_group, False):
             done = True
 
+        # Check if all yellow points are collected
         if score == yellow_points:
             done = True
             break
 
+        # Draw game elements on the screen
         screen.fill(black)
         wall_list.draw(screen)
         gate.draw(screen)
@@ -178,11 +196,14 @@ def startGame(enemiesNum):
         screen.blit(text_score, [20, 20])
         pygame.display.flip()
         clock.tick(10)
+        
+    # Display win or lose message and options
     if score == yellow_points:
         doWon("You Won!", 240, enemiesNum)
     else:
         doLost("You Lost!", 240, enemiesNum)
 
+# Function to display winning message
 def doWon(message, left, enemiesNum):
     while True:
         for event in pygame.event.get():
@@ -194,6 +215,7 @@ def doWon(message, left, enemiesNum):
                 if event.key == pygame.K_RETURN:
                     return startGame(enemiesNum)
 
+        # Display winning message and options
         w = pygame.Surface((400,200))
         w.set_alpha(10)
         w.fill((128,128,128))
@@ -210,6 +232,7 @@ def doWon(message, left, enemiesNum):
         pygame.display.flip()
         clock.tick(10)
 
+# Function to display losing message
 def doLost(message, left, enemiesNum):
     while True:
         for event in pygame.event.get():
@@ -221,6 +244,7 @@ def doLost(message, left, enemiesNum):
                 if event.key == pygame.K_RETURN:
                     return startGame(enemiesNum)
 
+        # Display losing message and options
         w = pygame.Surface((400,200))
         w.set_alpha(10)
         w.fill((128,128,128))
@@ -237,5 +261,6 @@ def doLost(message, left, enemiesNum):
         pygame.display.flip()
         clock.tick(10)
 
+# Start the game
 startGame(enemiesNum)
 pygame.quit()
