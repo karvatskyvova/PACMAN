@@ -23,7 +23,7 @@ jobs:
         
     - name: Run Pytest tests and generate HTML report
       run: |
-        pytest --cov=. --html=pytest_report.html
+        pytest --cov=./ --cov-report html --html=pytest_report.html
 
     - name: Check code style and generate HTML report
       run: |
