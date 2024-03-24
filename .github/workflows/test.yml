@@ -1,0 +1,38 @@
+name: Python CI
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run Pytest tests and generate HTML report
+      run: |
+        pytest --cov=. --html=pytest_report.html
+
+    - name: Check code style and generate HTML report
+      run: |
+        flake8 --format=html --htmldir=flake8_report.html .
+
+    - name: Upload test and linting reports
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-and-lint-reports
+        path: |
+          pytest_report.html
+          flake8_report.html
