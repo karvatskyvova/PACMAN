@@ -21,10 +21,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         
-    - name: Run Pytest tests
+    - name: Run Pytest tests and generate HTML report
       run: |
-        pytest
+        pytest --html=pytest_report.html
 
-    - name: Check code style
+    - name: Generate Flake8 HTML report
       run: |
-        flake8 --select=E9,F63,F7,F82
+        flake8 --select=E9,F63,F7,F82 --format=html --htmldir=flake8_report
