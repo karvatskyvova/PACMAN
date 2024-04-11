@@ -1,0 +1,36 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.12.2'
+      
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install flake8
+      
+    - name: Run Pytest
+      run: |
+        pytest --html=pytest-report.html
+      
+    - name: Run Flake8
+      run: |
+        flake8 --exclude=.git,__pycache__,.venv --max-line-length=100 .
+        flake8 --format=html --htmldir=flake8-report
