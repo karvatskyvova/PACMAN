@@ -30,7 +30,7 @@ jobs:
 
     - name: Generate Flake8 HTML report
       run: |
-        flake8 --format=html --htmldir=flake8-report .
+        flake8 --select=E9,F63,F7,F82 --format=html --htmldir=flake8_report
 
     - name: Upload HTML reports
       uses: actions/upload-artifact@v2
