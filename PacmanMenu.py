@@ -1,12 +1,14 @@
-import pygame, json
+import pygame
+import json
 from sys import argv, exit
 from os import path
 
 pygame.init()
 SCREEN_SIZE: int = 606
-screen = pygame.display.set_mode((SCREEN_SIZE, SCREEN_SIZE)) #Розмір вікна
+screen = pygame.display.set_mode((SCREEN_SIZE, SCREEN_SIZE))  # Розмір вікна
 pygame.display.set_caption("PACMAN")
-pygame.display.set_icon(pygame.image.load("Resourses/icon.png")) #Значок вікна
+pygame.display.set_icon(pygame.image.load("Resourses/icon.png"))  # Значок вікна
+
 
 def DrawArrow(x: int, y: int, direction: str, size: int, color: tuple):
     """Малює кнопки у вигляді стрілок для вибору рівня\n
@@ -20,14 +22,17 @@ def DrawArrow(x: int, y: int, direction: str, size: int, color: tuple):
         points = [(x, y), (x + size, y + size / 2), (x + size, y - size / 2)]
     pygame.draw.polygon(screen, color, points)
 
-def PlaceText(topLeftX: int, topLeftY: int, text: str, textColor: tuple, backgroundColor: tuple, fontSize: float, centered: bool):
+
+def PlaceText(topLeftX: int, topLeftY: int, text: str, textColor: tuple,
+              backgroundColor: tuple, fontSize: float, centered: bool):
     """Додає текст на екран, шрифт - freesansbold\n
     topLeftX, topLeftY - координати верхньої лівої точки прямокутника з текстом\n
     text - зміст тексту\n
     textColor - колір тексту, формат: (х, х, х)\n
     backgroundColor - колір фону (не обов'язково), формат: (х, х, х)\n
     fontSize - розмір тексту\n
-    centered - відцентрований текст чи ні. Якщо так, topLeftX та topLeftY будуть вказувати в центр тексту"""
+    centered - відцентрований текст чи ні.
+    Якщо так, topLeftX та topLeftY будуть вказувати в центр тексту"""
     font = pygame.font.Font("freesansbold.ttf", fontSize)
     renderedText = font.render(text, True, textColor, backgroundColor)
     textRectangle = renderedText.get_rect()
@@ -38,8 +43,9 @@ def PlaceText(topLeftX: int, topLeftY: int, text: str, textColor: tuple, backgro
         textRectangle.top = topLeftY
     screen.blit(renderedText, textRectangle)
 
-#Винесена логіка з event для скорочення коду (використовується при виборі значення стрілочками)
-def Decrease(value: int, valueRange: tuple)->int:
+
+# Винесена логіка з event для скорочення коду (використовується при виборі значення стрілочками)
+def Decrease(value: int, valueRange: tuple) -> int:
     """Використовується для зменшення лівою стрілкою значення на 1
     value: поточне значення
     valueRange: діапазон допустимих значень value
@@ -48,8 +54,9 @@ def Decrease(value: int, valueRange: tuple)->int:
         return valueRange[1]
     else:
         return value - 1
-        
-def Increase(value: int, valueRange: tuple)->int:
+
+
+def Increase(value: int, valueRange: tuple) -> int:
     """Використовується для збільшення правою стрілкою значення на 1
     value: поточне значення
     valueRange: діапазон допустимих значень value
@@ -58,10 +65,11 @@ def Increase(value: int, valueRange: tuple)->int:
         return valueRange[0]
     else:
         return value + 1
-    
+
+
 def MenuInterface(chosenLevel: int):
     """Малює інтерфейс меню (зображення та кнопки)"""
-    #Логотип та фонове зображення
+    # Логотип та фонове зображення
     logo = pygame.image.load("Resourses/logo.png")
     background1 = pygame.image.load("Resourses/level1.png")
     background2 = pygame.image.load("Resourses/level2.png")
@@ -73,10 +81,12 @@ def MenuInterface(chosenLevel: int):
         screen.blit(background2, (0, 0))
     screen.blit(logo, (68, 40))
     screen.blit(settings, (15, 15))
-    #Кнопки вибору рівня
+    # Кнопки вибору рівня
     DrawArrow(20, SCREEN_SIZE / 2, "left", 50, (255, 234, 0))
     DrawArrow(SCREEN_SIZE - 20, SCREEN_SIZE / 2, "right", 50, (255, 234, 0))
-    PlaceText(SCREEN_SIZE / 2, SCREEN_SIZE / 4 * 3 + 60, f"Press ENTER to Start Level {chosenLevel}", (255, 234, 0), (0, 0, 0), 18, True)
+    PlaceText(SCREEN_SIZE / 2, SCREEN_SIZE / 4 * 3 + 60,
+              f"Press ENTER to Start Level {chosenLevel}", (255, 234, 0), (0, 0, 0), 18, True)
+
 
 def SettingsMenuInterface(enemiesNum: int, enemiesSpeed: int):
     """Інтерфейс меню налаштувань"""
@@ -92,7 +102,7 @@ def SettingsMenuInterface(enemiesNum: int, enemiesSpeed: int):
     manyGhosts = pygame.transform.smoothscale(manyGhosts, (80, 40))
     slowGhost = pygame.transform.smoothscale(slowGhost, (40, 40))
     fastGhost = pygame.transform.smoothscale(fastGhost, (60, 40))
-    
+
     screen.blit(close, (15, 15))
     screen.blit(oneGhost, (SCREEN_SIZE / 6 - 20, SCREEN_SIZE / 3 - 20))
     screen.blit(manyGhosts, ((SCREEN_SIZE - SCREEN_SIZE / 6) - 40, SCREEN_SIZE / 3 - 20))
@@ -107,7 +117,9 @@ def SettingsMenuInterface(enemiesNum: int, enemiesSpeed: int):
     PlaceText(SCREEN_SIZE / 2, SCREEN_SIZE / 3 * 2, str(enemiesSpeed), (0, 0, 0), None, 30, True)
     DrawArrow(SCREEN_SIZE / 3 * 2, SCREEN_SIZE / 3 * 2, "right", 20, (0, 0, 0))
 
-def SettingsMenu(level: int, enemiesNum: int, enemiesSpeed: int, enemiesNumRange: tuple, enemiesSpeedRange: tuple)->tuple:
+
+def SettingsMenu(level: int, enemiesNum: int, enemiesSpeed: int,
+                 enemiesNumRange: tuple, enemiesSpeedRange: tuple) -> tuple:
     """Головна функція меню налаштувань"""
     SettingsMenuInterface(enemiesNum, enemiesSpeed)
     closeButton = pygame.Rect(15, 15, 30, 30)
@@ -138,15 +150,19 @@ def SettingsMenu(level: int, enemiesNum: int, enemiesSpeed: int, enemiesNumRange
             elif event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-        if MouseOn(closeButton) or MouseOn(enemNumLeftButton) or MouseOn(enemNumRightButton) or MouseOn(enemSpeedLeftButton) or MouseOn(enemSpeedRightButton):
+        if (MouseOn(closeButton) or MouseOn(enemNumLeftButton)
+                or MouseOn(enemNumRightButton) or MouseOn(enemSpeedLeftButton)
+                or MouseOn(enemSpeedRightButton)):
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
         else:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
         pygame.display.update()
 
-def MouseOn(button: pygame.Rect)->bool:
+
+def MouseOn(button: pygame.Rect) -> bool:
     """Перевіряє чи знаходиться курсор миші над даною кнопкою класу pygame.Rect"""
     return button.collidepoint(pygame.mouse.get_pos())
+
 
 def SaveData(filename: str, level: int, enemiesNum: int, enemiesSpeed: int):
     """Записує останній вибір користувача (номер рівня, кількість та швидкість ворогів) у json файл
@@ -155,7 +171,9 @@ def SaveData(filename: str, level: int, enemiesNum: int, enemiesSpeed: int):
     with open(filename, 'w') as f:
         json.dump(data, f)
 
-def ReadData(filename: str, levelMax: int, enemiesNumRange: tuple, enemiesSpeedRange: tuple)->tuple:
+
+def ReadData(filename: str, levelMax: int, enemiesNumRange: tuple,
+             enemiesSpeedRange: tuple) -> tuple:
     """Зчитує номер рівня, к-сть, швидкість ворогів з вказаного сейв файлу\n
     filename: ім'я сейв файлу (наприклад, PacmanSave.json)\n
     levelMax - максимальне значення змінної level (використовується для перевірки даних у сейві)\n
@@ -176,41 +194,46 @@ def ReadData(filename: str, levelMax: int, enemiesNumRange: tuple, enemiesSpeedR
                 raise Exception
             else:
                 return level, enemiesNum, enemiesSpeed
-        except:
+        except Exception:
             print("Error: Save File contains incorrect data")
     else:
         return None
 
-def Menu()->tuple:
+
+def Menu() -> tuple:
     """Стартове вікно гри. Вікривається одразу після запуску\n
     returns: номер обраного користувачем рівня, кількість та швидкість ворогів\n
     Якщо ці значення були передані через argv, одразу їх повертає"""
-    #Значення номеру рівня, к-сті та швидкості ворогів за замовчуванням
+    # Значення номеру рівня, к-сті та швидкості ворогів за замовчуванням
     level: int = 1
     enemiesNum: int = 2
     enemiesSpeed: int = 2
     saveFile: str = "PacmanSave.json"
-    #Крайні значення номеру рівня, к-сті та швидкості ворогів (вик. для перевірок крайніх значень)
+    # Крайні значення номеру рівня, к-сті та швидкості ворогів (вик. для перевірок крайніх значень)
     levelMax: int = 2
     enemiesNumRange: tuple = (1, 4)
     enemiesSpeedRange: tuple = (1, 4)
-    if len(argv) == 4: #Передача номеру рівня, к-сті ворогів та їх швидкості через argv
+    if len(argv) == 4:  # Передача номеру рівня, к-сті ворогів та їх швидкості через argv
         try:
-            if int(argv[1]) >= 1 and int(argv [1]) <= levelMax and int(argv[2]) >= enemiesNumRange[0] and int(argv[2]) <= enemiesNumRange[1] and int(argv[3]) >= enemiesSpeedRange[0] and int(argv[3]) <= enemiesSpeedRange[1]:
+            if (
+                int(argv[1]) >= 1 and int(argv[1]) <= levelMax and
+                int(argv[2]) >= enemiesNumRange[0] and int(argv[2]) <= enemiesNumRange[1] and
+                int(argv[3]) >= enemiesSpeedRange[0] and int(argv[3]) <= enemiesSpeedRange[1]
+               ):
                 return int(argv[1]), int(argv[2]), int(argv[3])
             else:
                 print("Wrong argv numbers")
-        except:
+        except Exception:
             print("Wrong argv type, expected int")
-            
+
     save = ReadData(saveFile, levelMax, enemiesNumRange, enemiesSpeedRange)
-    if save != None:
+    if save is not None:
         level = save[0]
         enemiesNum = save[1]
         enemiesSpeed = save[2]
 
     MenuInterface(level)
-    #Створення колізій для кнопок
+    # Створення колізій для кнопок
     leftArrow = pygame.Rect(20, SCREEN_SIZE / 2 - 25, 50, 50)
     rightArrow = pygame.Rect(SCREEN_SIZE - 70, SCREEN_SIZE / 2 - 25, 50, 50)
     settingsButton = pygame.Rect(15, 15, 30, 30)
@@ -225,7 +248,8 @@ def Menu()->tuple:
                     level = Increase(level, (1, levelMax))
                     MenuInterface(level)
                 elif MouseOn(settingsButton):
-                    enemiesNum, enemiesSpeed = SettingsMenu(level, enemiesNum, enemiesSpeed, enemiesNumRange, enemiesSpeedRange)
+                    enemiesNum, enemiesSpeed = SettingsMenu(level, enemiesNum, enemiesSpeed,
+                                                            enemiesNumRange, enemiesSpeedRange)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     level = Decrease(level, (1, levelMax))
@@ -237,7 +261,8 @@ def Menu()->tuple:
                     SaveData(saveFile, level, enemiesNum, enemiesSpeed)
                     return level, enemiesNum, enemiesSpeed
                 elif event.key == pygame.K_ESCAPE:
-                    enemiesNum, enemiesSpeed = SettingsMenu(level, enemiesNum, enemiesSpeed, enemiesNumRange, enemiesSpeedRange)
+                    enemiesNum, enemiesSpeed = SettingsMenu(level, enemiesNum, enemiesSpeed,
+                                                            enemiesNumRange, enemiesSpeedRange)
             elif event.type == pygame.QUIT:
                 return
         if MouseOn(leftArrow) or MouseOn(rightArrow) or MouseOn(settingsButton):
@@ -246,8 +271,14 @@ def Menu()->tuple:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
         pygame.display.update()
 
+
 if __name__ == "__main__":
     userChoice = Menu()
-    if userChoice != None:
-        print(f"\nUSER CHOICE\nLevel: {userChoice[0]}\nNumber of Enemies: {userChoice[1]}\nEnemies Speed: {userChoice[2]}\n")
+    if userChoice is not None:
+        print(f"""
+USER CHOICE
+Level: {userChoice[0]}
+Number of Enemies: {userChoice[1]}
+Enemies Speed: {userChoice[2]}
+""")
     pygame.quit()

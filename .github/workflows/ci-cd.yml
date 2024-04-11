@@ -2,37 +2,40 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - feature/menu
-  pull_request:
-    branches:
-      - feature/menu
+    branches: "feature/menu"
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  build:
+
+    runs-on: windows-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v2
-      
+
     - name: Set up Python
       uses: actions/setup-python@v2
-      with:
-        python-version: '3.12.2'
-      
+
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
         pip install pytest
         pip install pytest-html
         pip install flake8
-      
-    - name: Run Pytest
+        pip install flake8-html
+
+    - name: Run Pytest tests and generate HTML report
       run: |
-        pytest --html=pytest-report.html
-      
-    - name: Run Flake8
+        pytest --html=pytest_report.html
+
+    - name: Generate Flake8 HTML report
       run: |
-        flake8 --exclude=.git,__pycache__,.venv --max-line-length=100 .
-        flake8 --format=html --htmldir=flake8-report
+        flake8 --format=html --htmldir=flake8-report .
+
+    - name: Upload HTML reports
+      uses: actions/upload-artifact@v2
+      with:
+        name: HTML Reports
+        path: |
+          pytest_report.html
+          flake8_report
