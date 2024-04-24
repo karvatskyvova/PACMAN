@@ -14,7 +14,7 @@ def init_pygame():
 def player(init_pygame):
     # Initialize display for loading images
     pygame.display.set_mode((606, 606))
-    return Player("Characters/PacmanRight.png", 30, 30)  # Adjust arguments as needed
+    return Player("Characters/PacmanRight.png", 30, 30)
 
 # Fixture to create a Pink Ghost object
 @pytest.fixture
