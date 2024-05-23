@@ -1,0 +1,5 @@
+pytest>=6.2.0
+pytest-html>=3.2.0
+flake8>=4.0.0
+flake8-html>=0.4.1
+pygame>=1.9.2
