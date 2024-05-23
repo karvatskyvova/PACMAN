@@ -51,7 +51,7 @@ class TestPacmanGame(unittest.TestCase):
         self.assertEqual(gate_sprite.rect.width, 42)
         self.assertEqual(gate_sprite.rect.height, 2)
 
-    @patch('Pacman_map2.load_saved_settings', return_value=(1, 4))
+    @patch('your_module.load_saved_settings', return_value=(1, 4))
     @patch('pygame.display.set_mode')
     @patch('pygame.font.Font')
     def test_startGame(self, mock_font, mock_display, mock_load_saved_settings):
