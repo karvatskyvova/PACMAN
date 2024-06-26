@@ -1,0 +1,80 @@
+import pytest
+import pygame
+from Characters import Player, Ghost, Pink_directions, Blue_directions, Red_directions, Yellow_directions
+from Pacman_menu import load_saved_settings, Menu
+from your_pacman_game_module import setupMaze, setupGate, Wall, Block, startGame  # adjust the import path
+
+# Initialize Pygame to avoid errors in test environment
+pygame.init()
+
+@pytest.fixture
+def all_sprites_list():
+    return pygame.sprite.RenderPlain()
+
+def test_setupMaze(all_sprites_list):
+    wall_list, block_list = setupMaze(all_sprites_list)
+    assert len(wall_list) > 0, "Wall list should not be empty"
+    assert len(block_list) > 0, "Block list should not be empty"
+
+def test_setupGate(all_sprites_list):
+    gate = setupGate(all_sprites_list)
+    assert len(gate) == 1, "There should be one gate"
+
+def test_player_initial_position():
+    player = Player("Characters/PacmanRight.png", 30, 30)
+    player.rect.x = 140
+    player.rect.y = 100
+    assert player.rect.x == 140
+    assert player.rect.y == 100
+
+def test_player_movement():
+    player = Player("Characters/PacmanRight.png", 30, 30)
+    player.rect.x = 140
+    player.rect.y = 100
+
+    # Simulate player moving right
+    player.changespeed(15, 0)
+    player.rect.x += player.change_x
+    assert player.rect.x == 155
+
+    # Simulate player moving up
+    player.changespeed(0, -15)
+    player.rect.y += player.change_y
+    assert player.rect.y == 85
+
+def test_ghost_initial_position():
+    ghost = Ghost("Characters/Pink.png", 30, 30, Pink_directions)
+    ghost.rect.x, ghost.rect.y = 282, 242
+    assert ghost.rect.x == 282
+    assert ghost.rect.y == 242
+
+def test_collision_with_wall(all_sprites_list):
+    wall_list, block_list = setupMaze(all_sprites_list)
+    player = Player("Characters/PacmanRight.png", 30, 30)
+    player.rect.x = wall_list.sprites()[0].rect.x
+    player.rect.y = wall_list.sprites()[0].rect.y
+
+    collision = pygame.sprite.spritecollide(player, wall_list, False)
+    assert collision, "Player should collide with wall"
+
+def test_collision_with_block(all_sprites_list):
+    wall_list, block_list = setupMaze(all_sprites_list)
+    player = Player("Characters/PacmanRight.png", 30, 30)
+    player.rect.x = block_list.sprites()[0].rect.x
+    player.rect.y = block_list.sprites()[0].rect.y
+
+    collision = pygame.sprite.spritecollide(player, block_list, True)
+    assert collision, "Player should collide with block"
+
+def test_score_update(all_sprites_list):
+    wall_list, block_list = setupMaze(all_sprites_list)
+    player = Player("Characters/PacmanRight.png", 30, 30)
+    player.rect.x = block_list.sprites()[0].rect.x
+    player.rect.y = block_list.sprites()[0].rect.y
+
+    collision = pygame.sprite.spritecollide(player, block_list, True)
+    score = len(collision)
+    assert score == 1, "Score should be updated when block is collected"
+
+if __name__ == "__main__":
+    pytest.main()
